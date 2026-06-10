@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Масляные Духи | Ocean Scent</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --deep: #0a1628;
+      --midnight: #0d2140;
+      --ocean: #0e3a5e;
+      --teal: #0f7d8c;
+      --aqua: #1ab3c4;
+      --foam: #a8dde9;
+      --mist: #d4eef5;
+      --pearl: #f0f8fc;
+      --sand: #e8d5b7;
+      --gold: #c9a96e;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Jost', sans-serif;
+      background: var(--deep);
+      color: var(--mist);
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      background: var(--aqua);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.15s ease;
+      mix-blend-mode: screen;
+    }
+    .cursor-ring {
+      position: fixed;
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(26, 179, 196, 0.4);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transition: all 0.4s ease;
+    }
+
+    /* Ocean canvas background */
+    #ocean-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Noise texture overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.4;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 1.4rem 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(to bottom, rgba(10,22,40,0.95) 0%, transparent 100%);
+    }
+
+    .logo {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .logo-main {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      font-weight: 300;
+      letter-spacing: 0.25em;
+      color: var(--pearl);
+      line-height: 1;
+    }
+    .logo-sub {
+      font-size: 0.6rem;
+      font-weight: 200;
+      letter-spacing: 0.5em;
+      color: var(--aqua);
+      text-transform: uppercase;
+    }
+
+    nav {
+      display: flex;
+      gap: 0.2rem;
+    }
+    .nav-btn {
+      background: none;
+      border: none;
+      color: rgba(212,238,245,0.55);
+      font-family: 'Jost', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 300;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 0.5rem 1rem;
+      cursor: none;
+      transition: color 0.3s;
+      position: relative;
+    }
+    .nav-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 50%; right: 50%;
+      height: 1px;
+      background: var(--aqua);
+      transition: all 0.3s ease;
+    }
+    .nav-btn:hover, .nav-btn.active {
+      color: var(--pearl);
+    }
+    .nav-btn:hover::after, .nav-btn.active::after {
+      left: 1rem; right: 1rem;
+    }
+
+    /* ─── HERO STRIP ─── */
+    .hero-strip {
+      position: relative;
+      z-index: 2;
+      padding: 10rem 3rem 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .hero-eyebrow {
+      font-size: 0.65rem;
+      letter-spacing: 0.4em;
+      color: var(--aqua);
+      text-transform: uppercase;
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      font-weight: 300;
+      line-height: 0.95;
+      color: var(--pearl);
+      max-width: 700px;
+    }
+    .hero-title em {
+      font-style: italic;
+      color: var(--foam);
+    }
+
+    /* ─── MAIN CONTENT ─── */
+    main {
+      position: relative;
+      z-index: 2;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 3rem 6rem;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; animation: fadeUp 0.6s ease forwards; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── SECTION HEADER ─── */
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 48px;
+      height: 1px;
+      background: var(--teal);
+    }
+    .section-label span {
+      font-size: 0.65rem;
+      letter-spacing: 0.35em;
+      color: var(--teal);
+      text-transform: uppercase;
+    }
+
+    h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 300;
+      color: var(--pearl);
+      margin-bottom: 2rem;
+      line-height: 1.1;
+    }
+    h2 em { font-style: italic; color: var(--foam); }
+
+    p {
+      font-size: 0.95rem;
+      font-weight: 300;
+      line-height: 1.9;
+      color: rgba(212,238,245,0.8);
+      margin-bottom: 1.2rem;
+      max-width: 640px;
+    }
+
+    strong { color: var(--pearl); font-weight: 400; }
+
+    /* ─── ABOUT PAGE ─── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: rgba(15, 125, 140, 0.15);
+      border: 1px solid rgba(15, 125, 140, 0.15);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 2.5rem;
+    }
+    .about-block {
+      padding: 2.5rem;
+      background: rgba(13,33,64,0.6);
+      backdrop-filter: blur(8px);
+      transition: background 0.3s;
+    }
+    .about-block:hover { background: rgba(15, 58, 94, 0.5); }
+    .about-icon {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .about-block h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: var(--foam);
+      margin-bottom: 0.8rem;
+    }
+    .about-block p { font-size: 0.88rem; margin: 0; max-width: none; }
+
+    .pull-quote {
+      margin: 3rem 0;
+      padding: 2rem 3rem;
+      border-left: 1px solid var(--teal);
+      position: relative;
+    }
+    .pull-quote::before {
+      content: '"';
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 6rem;
+      color: rgba(15,125,140,0.2);
+      position: absolute;
+      top: -1rem; left: 1.5rem;
+      line-height: 1;
+    }
+    .pull-quote p {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-style: italic;
+      font-weight: 300;
+      color: var(--mist);
+      max-width: 500px;
+      line-height: 1.5;
+    }
+
+    /* ─── COMPOSITION CARDS ─── */
+    .formula-card {
+      border: 1px solid rgba(15,125,140,0.25);
+      border-radius: 2px;
+      padding: 2.5rem;
+      margin-bottom: 1.5rem;
+      background: rgba(13,33,64,0.5);
+      backdrop-filter: blur(8px);
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+    .formula-card::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle, rgba(26,179,196,0.08) 0%, transparent 70%);
+    }
+    .formula-card:hover { border-color: rgba(26,179,196,0.4); }
+    .formula-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--pearl);
+      margin-bottom: 1.5rem;
+    }
+    .ingredient-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.8rem;
+    }
+    .ingredient-name {
+      font-size: 0.82rem;
+      font-weight: 300;
+      color: var(--foam);
+      width: 180px;
+      flex-shrink: 0;
+    }
+    .ingredient-bar-wrap {
+      flex: 1;
+      height: 2px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 1px;
+      overflow: hidden;
+    }
+    .ingredient-bar {
+      height: 100%;
+      background: linear-gradient(to right, var(--teal), var(--aqua));
+      border-radius: 1px;
+      transform-origin: left;
+      animation: barGrow 1s ease forwards;
+    }
+    @keyframes barGrow {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+    .ingredient-pct {
+      font-size: 0.75rem;
+      color: rgba(168,221,233,0.6);
+      width: 32px;
+      text-align: right;
+    }
+
+    .badge-cert {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(26,179,196,0.3);
+      border-radius: 30px;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: var(--aqua);
+    }
+
+    /* ─── SCENT TYPES ─── */
+    .scent-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: rgba(15,125,140,0.15);
+      margin-bottom: 2rem;
+    }
+    .scent-item {
+      padding: 2rem;
+      background: rgba(13,33,64,0.6);
+      text-align: center;
+      transition: background 0.3s;
+    }
+    .scent-item:hover { background: rgba(15,58,94,0.6); }
+    .scent-icon { font-size: 2rem; margin-bottom: 1rem; display: block; }
+    .scent-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      color: var(--pearl);
+      margin-bottom: 0.5rem;
+    }
+    .scent-desc {
+      font-size: 0.8rem;
+      color: rgba(168,221,233,0.7);
+      line-height: 1.6;
+      margin: 0;
+      max-width: none;
+    }
+
+    .durability-row {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    .dur-pill {
+      flex: 1;
+      min-width: 180px;
+      padding: 1.5rem;
+      border: 1px solid rgba(15,125,140,0.2);
+      border-radius: 2px;
+      background: rgba(13,33,64,0.4);
+    }
+    .dur-hours {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      color: var(--aqua);
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+    .dur-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(168,221,233,0.6);
+    }
+    .dur-note { font-size: 0.8rem; color: rgba(212,238,245,0.6); margin-top: 0.5rem; margin-bottom: 0; max-width: none; }
+
+    /* ─── PRICES ─── */
+    .price-section-title {
+      font-size: 0.65rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin: 2.5rem 0 1rem;
+    }
+    .price-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 0;
+      border-bottom: 1px solid rgba(15,125,140,0.15);
+      transition: padding-left 0.3s;
+    }
+    .price-row:hover { padding-left: 0.8rem; }
+    .price-vol {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      color: var(--pearl);
+    }
+    .price-amt {
+      font-size: 0.95rem;
+      font-weight: 400;
+      color: var(--aqua);
+    }
+    .price-old {
+      font-size: 0.8rem;
+      text-decoration: line-through;
+      color: rgba(168,221,233,0.35);
+      margin-left: 0.5rem;
+    }
+    .price-badge {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      border: 1px solid rgba(201,169,110,0.3);
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+    }
+
+    .promo-strip {
+      margin-top: 2rem;
+      padding: 1.5rem 2rem;
+      background: linear-gradient(135deg, rgba(15,125,140,0.2), rgba(10,22,40,0.1));
+      border: 1px solid rgba(26,179,196,0.2);
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .promo-icon { font-size: 1.5rem; }
+    .promo-text { font-size: 0.88rem; color: var(--foam); }
+
+    /* ─── DELIVERY ─── */
+    .delivery-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: rgba(15,125,140,0.1);
+      margin: 2rem 0;
+    }
+    .delivery-item {
+      padding: 2rem;
+      background: rgba(13,33,64,0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: background 0.3s;
+    }
+    .delivery-item:hover { background: rgba(15,58,94,0.5); }
+    .delivery-carrier {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      color: var(--pearl);
+    }
+    .delivery-price { font-size: 0.9rem; color: var(--aqua); }
+    .delivery-time { font-size: 0.78rem; color: rgba(168,221,233,0.6); letter-spacing: 0.05em; }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 1rem 2.5rem;
+      background: transparent;
+      border: 1px solid var(--aqua);
+      color: var(--pearl);
+      font-family: 'Jost', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 300;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: none;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+    .cta-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--aqua);
+      transform: translateX(-101%);
+      transition: transform 0.4s ease;
+      z-index: -1;
+    }
+    .cta-btn:hover::before { transform: translateX(0); }
+    .cta-btn:hover { color: var(--deep); border-color: var(--aqua); }
+
+    .support-line {
+      margin-top: 1.5rem;
+      font-size: 0.82rem;
+      color: rgba(168,221,233,0.5);
+    }
+    .support-line strong {
+      color: var(--teal);
+      font-weight: 400;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      position: relative;
+      z-index: 2;
+      padding: 3rem;
+      border-top: 1px solid rgba(15,125,140,0.15);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .footer-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: rgba(212,238,245,0.4);
+    }
+    .footer-note {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: rgba(168,221,233,0.25);
+      text-align: right;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 700px) {
+      header { padding: 1.2rem 1.5rem; flex-direction: column; gap: 1rem; }
+      nav { flex-wrap: wrap; justify-content: center; }
+      .hero-strip { padding: 8rem 1.5rem 3rem; }
+      main { padding: 0 1.5rem 4rem; }
+      .about-grid, .scent-grid, .delivery-options { grid-template-columns: 1fr; }
+      .pull-quote { padding: 1.5rem; }
+      footer { flex-direction: column; gap: 1rem; align-items: flex-start; }
+      .footer-note { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <canvas id="ocean-canvas"></canvas>
+
+  <header>
+    <div class="logo">
+      <span class="logo-main">Ocean Scent</span>
+      <span class="logo-sub">Масляные Духи · Ручная работа</span>
+    </div>
+    <nav>
+      <button class="nav-btn active" data-page="page1">О парфюме</button>
+      <button class="nav-btn" data-page="page2">Состав</button>
+      <button class="nav-btn" data-page="page3">Ароматы</button>
+      <button class="nav-btn" data-page="page4">Цены</button>
+      <button class="nav-btn" data-page="page5">Доставка</button>
+    </nav>
+  </header>
+
+  <div class="hero-strip">
+    <span class="hero-eyebrow">Искусство аромата в каждой капле</span>
+    <h1 class="hero-title" id="hero-title">Масляные Духи<br><em>Ocean Scent</em></h1>
+  </div>
+
+  <main>
+
+    <!-- PAGE 1 -->
+    <section id="page1" class="page active">
+      <div class="section-label"><span>О парфюме</span></div>
+      <h2>Зачем человеку<br><em>аромат?</em></h2>
+      <p>Парфюм — это не просто запах. Это <strong>невидимая аура</strong>, которая рассказывает о вас без слов.</p>
+
+      <div class="about-grid">
+        <div class="about-block">
+          <span class="about-icon">🌊</span>
+          <h3>Как раскрывается</h3>
+          <p>Масляные духи развиваются постепенно — верхние ноты (цитрус, зелень), затем сердце (цветы, специи), и наконец — база (древесина, мускус). Этот процесс занимает 20–40 минут и создаёт уникальную историю аромата.</p>
+        </div>
+        <div class="about-block">
+          <span class="about-icon">✦</span>
+          <h3>Шарм для окружающих</h3>
+          <p>Тёплый, обволакивающий шлейф масляных духов притягивает, создаёт ощущение близости и доверия. Люди запоминают вас по аромату — это ваша личная подпись.</p>
+        </div>
+        <div class="about-block">
+          <span class="about-icon">💧</span>
+          <h3>Без спирта</h3>
+          <p>Масляная основа не раздражает кожу, не испаряется мгновенно и дарит аромат, который живёт вместе с вами — теплеет от тепла тела и мягко меняется в течение дня.</p>
+        </div>
+        <div class="about-block">
+          <span class="about-icon">🌿</span>
+          <h3>Только натуральное</h3>
+          <p>Все ингредиенты сертифицированы. Никакой синтетики, никакого спирта. Гипоаллергенная формула для самых чувствительных типов кожи.</p>
+        </div>
+      </div>
+
+      <div class="pull-quote">
+        <p>Аромат — это память<br>в невидимой форме</p>
+      </div>
+    </section>
+
+    <!-- PAGE 2 -->
+    <section id="page2" class="page">
+      <div class="section-label"><span>Состав масел</span></div>
+      <h2>Из чего сделаны<br><em>наши духи</em></h2>
+      <p>Мы используем только натуральные эфирные и базовые масла. Вот формулы наших флагманских ароматов:</p>
+
+      <div class="formula-card">
+        <div class="formula-name">«Морской Закат»</div>
+        <div class="ingredient-row">
+          <span class="ingredient-name">Жожоба (база)</span>
+          <div class="ingredient-bar-wrap"><div class="ingredient-bar" style="width:60%"></div></div>
+          <span class="ingredient-pct">60%</span>
+        </div>
+        <div class="ingredient-row">
+          <span class="ingredient-name">Сандал</span>
+          <div class="ingredient-bar-wrap"><div class="ingredient-bar" style="width:15%"></div></div>
+          <span class="ingredient-pct">15%</span>
+        </div>
+        <div class="ingredient-row">
+          <span class="ingredient-name">Бергамот</span>
+          <div class="ingredient-bar-wrap"><div class="ingredient-bar" style="width:10%"></div></div>
+          <span class="ingredient-pct">10%</span>
+        </div>
+        <div class="ingredient-row">
+          <span class="ingredient-name">Иланг-иланг</span>
+          <div class="ingredient-bar-wrap"><div class="ingredient-bar" style="width:8%"></div></div>
+          <span class="ingredient-pct">8%</span>
+        </div>
+        <div class="ingredient-row">
+          <span class="ingredient-name">Ветивер</span>
+          <div class="ingredient-bar-wrap"><div class="ingredient-bar" style="width:5%"></div></div>
+          <span class="ingredient-pct">5%</span>
+        </div>
+        <div class="ingredient-row">
+          <span class="ingredient-name">Натуральный мускус</span>
+          <div class="ingredient-bar-wrap"><div class="ingredient-bar" style="width:2%"></div></div>
+          <span class="ingredient-pct">2%</span>
+        </div>
+      </div>
+
+      <div class="formula-card">
+        <div class="formula-name">«Нежный Рассвет»</div>
+        <div class="ingredient-row">
+          <span class="ingredient-name">Миндальное масло</span>
+          <div class="ingredient-bar-wrap"><div class="ingredient-bar" style="width:65%"></div></div>
+          <span class="ingredient-pct">65%</span>
+        </div>
+        <div class="ingredient-row">
+          <span class="ingredient-name">Жасмин</span>
+          <div class="ingredient-bar-wrap"><div class="ingredient-bar" style="width:12%"></div></div>
+          <span class="ingredient-pct">12%</span>
+        </div>
+        <div class="ingredient-row">
+          <span class="ingredient-name">Роза дамасская</span>
+          <div class="ingredient-bar-wrap"><div class="ingredient-bar" style="width:10%"></div></div>
+          <span class="ingredient-pct">10%</span>
+        </div>
+        <div class="ingredient-row">
+          <span class="ingredient-name">Ваниль</span>
+          <div class="ingredient-bar-wrap"><div class="ingredient-bar" style="width:8%"></div></div>
+          <span class="ingredient-pct">8%</span>
+        </div>
+        <div class="ingredient-row">
+          <span class="ingredient-name">Лаванда</span>
+          <div class="ingredient-bar-wrap"><div class="ingredient-bar" style="width:5%"></div></div>
+          <span class="ingredient-pct">5%</span>
+        </div>
+      </div>
+
+      <div class="badge-cert">✓ Все масла сертифицированы · Без синтетики и спирта · Гипоаллергенно</div>
+    </section>
+
+    <!-- PAGE 3 -->
+    <section id="page3" class="page">
+      <div class="section-label"><span>Виды ароматов</span></div>
+      <h2>Найдите<br><em>свой аромат</em></h2>
+
+      <div class="scent-grid">
+        <div class="scent-item">
+          <span class="scent-icon">👨</span>
+          <div class="scent-title">Мужские</div>
+          <p class="scent-desc">Терпкие, древесные, с нотами табака, кожи, пряностей. Стойкие, с мощным шлейфом.</p>
+        </div>
+        <div class="scent-item">
+          <span class="scent-icon">👩</span>
+          <div class="scent-title">Женские</div>
+          <p class="scent-desc">Нежные, цветочные, фруктовые. Лёгкие, воздушные, с мягким раскрытием.</p>
+        </div>
+        <div class="scent-item">
+          <span class="scent-icon">🌿</span>
+          <div class="scent-title">Унисекс</div>
+          <p class="scent-desc">Свежие, травяные, цитрусовые. Универсальные, подходят всем.</p>
+        </div>
+      </div>
+
+      <div class="durability-row">
+        <div class="dur-pill">
+          <span class="dur-hours">2–4 ч</span>
+          <span class="dur-label">Лёгкие</span>
+          <p class="dur-note">Для офиса и спорта. Деликатный, ненавязчивый аромат.</p>
+        </div>
+        <div class="dur-pill">
+          <span class="dur-hours">5–8 ч</span>
+          <span class="dur-label">Средние</span>
+          <p class="dur-note">На каждый день. Сопровождают от утра до вечера.</p>
+        </div>
+        <div class="dur-pill">
+          <span class="dur-hours">10+ ч</span>
+          <span class="dur-label">Стойкие</span>
+          <p class="dur-note">Для вечеров и особых случаев. Шлейф, который не забыть.</p>
+        </div>
+      </div>
+
+      <p style="margin-top:2rem; font-size:0.85rem; color: rgba(168,221,233,0.6)">
+        💡 Совет: наносите на пульсирующие точки — запястья, шея, за ушами — аромат раскроется ярче.
+      </p>
+    </section>
+
+    <!-- PAGE 4 -->
+    <section id="page4" class="page">
+      <div class="section-label"><span>Расценки</span></div>
+      <h2>Прозрачные<br><em>цены</em></h2>
+
+      <div class="price-section-title">Единичные флаконы</div>
+      <div class="price-row">
+        <span class="price-vol">5 мл</span>
+        <span class="price-amt">890 ₽</span>
+      </div>
+      <div class="price-row">
+        <span class="price-vol">10 мл</span>
+        <span class="price-amt">1 590 ₽</span>
+      </div>
+      <div class="price-row">
+        <span class="price-vol">30 мл</span>
+        <span class="price-amt">3 990 ₽</span>
+      </div>
+
+      <div class="price-section-title">Наборы · выгода до 25%</div>
+      <div class="price-row">
+        <span class="price-vol">«Знакомство» <br><small style="font-size:0.7rem;color:rgba(168,221,233,0.5)">3 × 5 мл разных ароматов</small></span>
+        <span class="price-amt">2 490 ₽ <span class="price-old">2 670 ₽</span></span>
+      </div>
+      <div class="price-row">
+        <span class="price-vol">«Коллекция» <br><small style="font-size:0.7rem;color:rgba(168,221,233,0.5)">5 × 10 мл</small></span>
+        <span class="price-amt">6 990 ₽ <span class="price-old">7 950 ₽</span></span>
+      </div>
+      <div class="price-row">
+        <span class="price-vol">«Премиум» <br><small style="font-size:0.7rem;color:rgba(168,221,233,0.5)">30 мл + дорожный спрей 5 мл</small></span>
+        <span class="price-amt">4 490 ₽</span>
+      </div>
+
+      <div class="promo-strip">
+        <span class="promo-icon">🎁</span>
+        <span class="promo-text">При заказе от <strong style="color:var(--pearl)">5 000 ₽</strong> — мини-пробник в подарок</span>
+      </div>
+    </section>
+
+    <!-- PAGE 5 -->
+    <section id="page5" class="page">
+      <div class="section-label"><span>Доставка</span></div>
+      <h2>По всей<br><em>России</em></h2>
+      <p>Доставляем в любой уголок страны. Все заказы упаковываются в подарочную коробку с защитой от протечек.</p>
+
+      <div class="delivery-options">
+        <div class="delivery-item">
+          <span class="delivery-carrier">СДЭК</span>
+          <span class="delivery-price">от 290 ₽</span>
+          <span class="delivery-time">2–7 дней</span>
+        </div>
+        <div class="delivery-item">
+          <span class="delivery-carrier">Почта России</span>
+          <span class="delivery-price">от 190 ₽</span>
+          <span class="delivery-time">5–14 дней</span>
+        </div>
+        <div class="delivery-item">
+          <span class="delivery-carrier">Экспресс</span>
+          <span class="delivery-price">490 ₽</span>
+          <span class="delivery-time">1 день · Москва, СПб</span>
+        </div>
+        <div class="delivery-item">
+          <span class="delivery-carrier">Бесплатно</span>
+          <span class="delivery-price">0 ₽</span>
+          <span class="delivery-time">При заказе от 3 500 ₽</span>
+        </div>
+      </div>
+
+      <a href="https://t.me/your_perfume_bot" class="cta-btn" target="_blank">
+        <span>Оформить заказ</span>
+        <span>→</span>
+      </a>
+
+      <p class="support-line">Вопросы? Пишите: <strong>@ocean_scent_support</strong></p>
+    </section>
+
+  </main>
+
+  <footer>
+    <span class="footer-brand">Ocean Scent © 2026</span>
+    <span class="footer-note">Масляные духи ручной работы<br>Создано с любовью</span>
+  </footer>
+
+  <script>
+    // ─── Custom cursor ───
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    (function animCursor() {
+      cursor.style.left = (mx - 4) + 'px';
+      cursor.style.top = (my - 4) + 'px';
+      rx += (mx - rx) * 0.12;
+      ry += (my - ry) * 0.12;
+      ring.style.left = (rx - 16) + 'px';
+      ring.style.top = (ry - 16) + 'px';
+      requestAnimationFrame(animCursor);
+    })();
+
+    // ─── Nav switching ───
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.page).classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Update hero title
+        const titles = {
+          page1: 'Масляные Духи<br><em>Ocean Scent</em>',
+          page2: 'Секрет<br><em>состава</em>',
+          page3: 'Мир<br><em>ароматов</em>',
+          page4: 'Наши<br><em>предложения</em>',
+          page5: 'Доставка<br><em>по России</em>',
+        };
+        document.getElementById('hero-title').innerHTML = titles[btn.dataset.page];
+      });
+    });
+
+    // ─── Ocean canvas ───
+    const canvas = document.getElementById('ocean-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, t = 0;
+
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function drawOcean() {
+      ctx.clearRect(0, 0, W, H);
+
+      // Deep gradient background
+      const bg = ctx.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, '#070f1c');
+      bg.addColorStop(0.5, '#0a1628');
+      bg.addColorStop(1, '#0d2140');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      // Bioluminescent deep glow
+      const glow1 = ctx.createRadialGradient(W * 0.3, H * 0.6, 0, W * 0.3, H * 0.6, W * 0.5);
+      glow1.addColorStop(0, 'rgba(14,58,94,0.35)');
+      glow1.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow1;
+      ctx.fillRect(0, 0, W, H);
+
+      const glow2 = ctx.createRadialGradient(W * 0.75, H * 0.35, 0, W * 0.75, H * 0.35, W * 0.45);
+      glow2.addColorStop(0, 'rgba(15,125,140,0.12)');
+      glow2.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow2;
+      ctx.fillRect(0, 0, W, H);
+
+      // Wave layers
+      const waves = [
+        { amp: 28, freq: 0.008, speed: 0.4,  y: H * 0.72, alpha: 0.06, color: '#1ab3c4' },
+        { amp: 20, freq: 0.012, speed: 0.65, y: H * 0.75, alpha: 0.09, color: '#0f7d8c' },
+        { amp: 14, freq: 0.018, speed: 0.9,  y: H * 0.78, alpha: 0.12, color: '#0e3a5e' },
+        { amp: 10, freq: 0.025, speed: 1.2,  y: H * 0.82, alpha: 0.07, color: '#a8dde9' },
+      ];
+
+      waves.forEach(w => {
+        ctx.beginPath();
+        ctx.moveTo(0, H);
+        for (let x = 0; x <= W; x += 2) {
+          const y = w.y + Math.sin(x * w.freq + t * w.speed) * w.amp
+                       + Math.sin(x * w.freq * 1.7 + t * w.speed * 0.6) * w.amp * 0.4;
+          ctx.lineTo(x, y);
+        }
+        ctx.lineTo(W, H);
+        ctx.closePath();
+
+        const grad = ctx.createLinearGradient(0, w.y - w.amp, 0, H);
+        grad.addColorStop(0, w.color + Math.round(w.alpha * 255).toString(16).padStart(2,'0'));
+        grad.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad;
+        ctx.fill();
+      });
+
+      // Floating particles (foam / plankton)
+      ctx.save();
+      const pCount = 40;
+      for (let i = 0; i < pCount; i++) {
+        const px = ((i * 137.5 + t * 18) % W);
+        const py = H * 0.55 + Math.sin(i * 2.1 + t * 0.5) * H * 0.2;
+        const alpha = 0.08 + 0.07 * Math.sin(i + t);
+        const r = 0.8 + 0.8 * Math.abs(Math.sin(i * 0.9));
+        ctx.beginPath();
+        ctx.arc(px, py, r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(168,221,233,${alpha})`;
+        ctx.fill();
+      }
+      ctx.restore();
+
+      t += 0.012;
+      requestAnimationFrame(drawOcean);
+    }
+    drawOcean();
+  </script>
+</body>
+</html>
